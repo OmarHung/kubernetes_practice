@@ -1,0 +1,15 @@
+# 用於定義 Service02 的 Endpoints
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: nginx-svc-external
+  labels:
+    app: nginx
+
+subsets:
+  - addresses:
+    - ip: 142.250.77.14 # 這裡填寫你的 目標 IP
+    ports:
+    - port: 80
+      name: web # 對應service的端口名稱
+      protocol: TCP

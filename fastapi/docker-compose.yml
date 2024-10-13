@@ -1,0 +1,31 @@
+version: "3.8"  # 定義 docker-compose 的版本，這裡使用的是 3.8 版本。
+
+services:  # 定義多個服務，每個服務可以是容器化應用程式。
+  app:  # 這是定義的第一個服務，名稱為 `app`，表示我們的 FastAPI 應用。
+    build: ..  # 指定 Dockerfile 所在的目錄，`.` 表示當前目錄，會根據 Dockerfile 來構建映像。
+    ports:  # 映射主機和容器之間的端口，讓應用程式能夠從外部訪問。
+      - "8000:8000"  # 將主機的 8000 端口映射到容器內的 8000 端口，FastAPI 應用會在 8000 端口運行。
+    depends_on:  # 定義此服務依賴的其他服務，確保這些服務在 `app` 啟動前已啟動。
+      - mongo  # `app` 依賴 `mongo` 服務，會在 `mongo` 啟動後再啟動。
+      - redis  # `app` 依賴 `redis` 服務，會在 `redis` 啟動後再啟動。
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+      - REDIS_URL=redis://redis:6379
+
+  mongo:  # 定義第二個服務，名稱為 `mongo`，表示 MongoDB 資料庫。
+    image: mongo:latest  # 指定使用 MongoDB 的最新版本映像來運行服務。
+    ports:  # 映射主機和容器之間的端口。
+      - "27017:27017"  # 將主機的 27017 端口映射到容器內的 27017 端口，這是 MongoDB 的默認端口。
+    volumes:
+      - mongo_data:/data/db  # 將主機上的 mongo_data 卷掛載到容器內的 /data/db 目錄
+
+  redis:  # 定義第三個服務，名稱為 `redis`，表示 Redis 資料庫。
+    image: redis:latest  # 指定使用 Redis 的最新版本映像來運行服務。
+    ports:  # 映射主機和容器之間的端口。
+      - "6379:6379"  # 將主機的 6379 端口映射到容器內的 6379 端口，這是 Redis 的默認端口。
+    volumes:
+      - redis_data:/data  # 將主機上的 redis_data 卷掛載到容器內的 /data 目錄
+
+volumes:  # 定義全局的卷
+  mongo_data:  # 創建名為 mongo_data 的卷，存放 MongoDB 的數據
+  redis_data:  # 創建名為 redis_data 的卷，存放 Redis 的數據

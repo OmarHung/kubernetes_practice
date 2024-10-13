@@ -1,0 +1,55 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  serviceName: "nginx"  # 使用的服務名稱
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports: # 容器的端口
+        - containerPort: 80 # 容器的端口號
+          name: web # 端口名稱
+  updateStrategy:
+    type: OnDelete # 更新策略，刪除後更新
+#    type: RollingUpdate # 更新策略，滾動更新
+#    rollingUpdate:
+#      partition: 3 # >= 3 的 Pod 才會被更新
+#        volumeMounts:
+#        - name: www # volume 的名稱
+#          mountPath: /usr/share/nginx/html # 挂載的路徑
+#  volumeClaimTemplates:
+#  - metadata:
+#      name: www # volume 的名稱
+#      annotations: # 註解
+#        volume.alpha.kubernetes.io/storage-class: anything
+#    spec:
+#      accessModes: [ "ReadWriteOnce" ] # 存取模式
+#      resources:
+#        requests:
+#          storage: 1Gi # 需要的存儲空間

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fastapi
+  template:
+    metadata:
+      labels:
+        app: fastapi
+    spec:
+      containers:
+        - name: fastapi
+          image: omar40276/fastapi-app:latest
+          ports:
+            - containerPort: 8000
+#          env:
+#            - name: MONGO_URL
+#              value: "mongodb://mongo:27017"
+#            - name: REDIS_URL
+#              value: "redis://redis:6379"

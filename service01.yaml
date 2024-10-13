@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+  labels:
+    app: nginx
+spec:
+  selector:
+    app: nginx-deploy
+  ports:
+    - port: 80 # service的端口
+      targetPort: 80 # 目標po的端口
+      name: web # 端口名稱
+  type: NodePort # 在node上隨機啟動30000-32767之間的端口，並將該端口映射到service的端口，不建議在生產環境中使用
+                # ClusterIP: 預設值，可以在集群內部訪問
+                # NodePort: 在每個節點上開啟一個端口，可以從集群外部訪問
+                # LoadBalancer: 在外部負載均衡器上開啟一個端口，強化版的 NodePort ，除了擁有 NodePort 可以讓外部連線的優點，同時也建立了負載平衡的機制來分散流量
+                # ExternalName: 讓不同 namespace 中的以 ClusterIP 形式生成的 Service 可以利用 ExternalName 設定的外部名稱，藉以連到指定的 namespace 中的 Service

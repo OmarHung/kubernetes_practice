@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+spec:
+  selector:
+    matchLabels:
+      app: logging
+  template:
+    metadata:
+      labels:
+        app: logging
+        id: fluentd
+      name: fluentd
+    spec:
+      nodeSelector: # 有加這個才會只加到指定的節點，不然全部節點都會有
+        type: microservices
+      containers:
+        - name: fluentd-es
+          image: agilestacks/fluentd-elasticsearch:latest
+          env:
+            - name: FLUENTD_ARGS
+              value: -qq
+          volumeMounts:
+            - name: containers
+              mountPath: /var/lib/docker/containers # 掛載到 fluentd 容器中的路徑
+            - name: varlog
+              mountPath: /var/log
+      volumes:
+        - hostPath:
+            path: /var/lib/docker/containers # 宿主機的路徑
+          name: containers
+        - hostPath:
+            path: /var/log
+          name: varlog

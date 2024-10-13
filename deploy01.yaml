@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-deploy
+  name: nginx-deploy
+spec:
+  replicas: 3 # 副本數量
+  revisionHistoryLimit: 10 # 保留最近10次的歷史版本
+  selector:
+    matchLabels:
+      app: nginx-deploy
+  strategy:
+    rollingUpdate:
+      maxSurge: 25% # 一次最多增加 25% 的 Pod
+      maxUnavailable: 25% # 一次最多減少 25% 的 Pod
+    type: RollingUpdate # 更新策略，滾動更新
+  template:
+    metadata:
+      labels:
+        app: nginx-deploy
+    spec:
+      containers:
+        - image: nginx:latest
+          imagePullPolicy: Always
+          name: nginx
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

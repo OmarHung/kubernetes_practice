@@ -1,0 +1,10 @@
+# 用於將 Service 轉向到外部網域
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-domain
+  labels:
+    app: external-domain
+spec:
+  type: ExternalName
+  externalName: www.google.com

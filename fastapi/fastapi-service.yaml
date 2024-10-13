@@ -1,0 +1,14 @@
+# k8s 內部網路通訊
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-service
+spec:
+  selector:
+    app: fastapi
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8001 # - port 指定我們 Pod 上的 targetPort 要 mapping 到 Service 中 ClusterIP 中的哪個 port
+      targetPort: 8000 # - targetPort 指定我們 Pod 上允許外部資源存取 Port Number
+      nodePort: 30000 # - nodePort 指定我們 Pod 上的 targetPort 要 mapping 到 Node 上的哪個 port

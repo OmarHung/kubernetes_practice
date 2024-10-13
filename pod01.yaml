@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-po
+  labels: # 自定義的key-value標籤
+    type: app
+    version: 1.0.0
+  namespace: default
+spec:
+  terminationGracePeriodSeconds: 30 # 當終止容器時，Kubernetes 給與容器多長時間來完成清理工作
+  containers:
+    - name: nginx # 容器的名稱
+      image: nginx:latest # 容器的鏡像
+      imagePullPolicy: IfNotPresent # 如果本地沒有此鏡像，則從鏡像倉庫下載。 Always: 總是從鏡像倉庫下載 Never: 不從鏡像倉庫下載，只使用本地鏡像
+      lifecycle: # 容器的生命周期
+        postStart: # 容器啟動後執行的命令
+          exec:
+            command:
+              - sh
+              - -c
+              - "echo '<h1>Post stop</h1>' > /usr/share/nginx/html/index.html"
+        preStop: # 容器終止前執行的命令
+          exec:
+            command:
+              - sh
+              - -c
+              - "sleep 50; echo 'sleep finished...' >> /usr/share/nginx/html/index.html"
+      startupProbe: # Startup Probe 類似於 Readiness Probe，它用於檢測容器是否正在進行啟動過程。與 Readiness Probe 不同，Startup Probe 可以在應用程序就緒之前執行多次檢測。
+#        httpGet:
+#          path: /index.html # 探測的路徑
+#          port: 80 # 探測的端口
+#        tcpSocket:
+#          port: 80 # 探測的端口
+        exec:
+          command:
+            - sh
+            - -c
+            - "sleep 3; echo 'hello' > /inited;"
+        failureThreshold: 3 # 失敗次數，超過3次則容器被標記為異常
+        periodSeconds: 10 # 探測的間隔時間
+        successThreshold: 1 # 成功次數，超過1次則容器被標記為正常
+        timeoutSeconds: 5 # 探測的超時時間
+      livenessProbe: # 確保應用程序在容器內部運行，如果檢測失敗，Kubernetes 將會終止容器並重新啟動它
+        httpGet:
+          path: /index.html # 探測的路徑
+          port: 80 # 探測的端口
+        failureThreshold: 3 # 失敗次數，超過3次則容器被標記為異常
+        periodSeconds: 10 # 探測的間隔時間
+        successThreshold: 1 # 成功次數，超過1次則容器被標記為正常
+        timeoutSeconds: 5 # 探測的超時時間
+      readinessProbe: # 當容器內的應用程序正在啟動或正在進行一些初始化工作時，可以使用 Readiness Probe。當應用程序就緒時，它將返回成功的應答，並且 Kubernetes 可以開始將流量路由到該容器。
+        httpGet:
+          path: /index.html # 探測的路徑
+          port: 80 # 探測的端口
+        failureThreshold: 3 # 失敗次數，超過3次則容器被標記為異常
+        periodSeconds: 10 # 探測的間隔時間
+        successThreshold: 1 # 成功次數，超過1次則容器被標記為正常
+        timeoutSeconds: 5 # 探測的超時時間
+      workingDir: /usr/share/nginx/html # 容器的工作目錄
+      ports:
+        - name: http # 容器的端口名稱
+          containerPort: 80 # 容器的端口
+          protocol: TCP # 端口的協議
+      env: # 容器的環境變量
+        - name: JVM_OPTS
+          value: "-Xmx512m -Xms256m"
+        - name: NGINX_HOST
+          value: "localhost"
+      resources: # 容器的資源限制
+        requests: # 容器的資源最少需求
+          cpu: 100m # CPU的限制，100m表示0.1核
+          memory: 256Mi # 內存的限制，256Mi表示256MB
+        limits: # 容器的資源最大限制
+          cpu: "200m" # CPU的限制，200m表示0.2核
+          memory: "512Mi" # 內存的限制，512Mi表示512MB
+  restartPolicy: OnFailure # 容器異常退出後的重啟策略，Always: 總是重啟 Never: 永不重啟 OnFailure: 異常退出時重啟
+  # imagePullSecrets: # 鏡像倉庫的密碼
+  #    name: regsecret
