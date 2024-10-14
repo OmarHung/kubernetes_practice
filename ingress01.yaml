@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: / # 重寫目標，將請求重寫到指定的路徑
+spec:
+  rules: # 規則，可以有多個
+  - host: nginx.hung.com # 訪問的域名，可用通配符 * 例如: *.hung.com
+    http:
+      paths: # 路徑，可以有多個，相當於nginx的location
+      - pathType: Prefix # 路徑類型，可以是Prefix：前綴匹配，依/分割、Exact：精確匹配，要求完全相同、ImplementationSpecific：實現特定IngressClass的路徑類型
+        backend:
+          service:
+            name: nginx-svc # 綁定到的service
+            port:
+              number: 80 # 綁定到的service的端口
+        path: /so # 等價於nginx中location的路徑前綴匹配
